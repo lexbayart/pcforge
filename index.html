@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>PCForge v3 — AI/ML PC Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#07070f;--bg2:#0f0f1a;--bgc:#131320;--bgs:#0d0d18;--g:#00ff88;--b:#00aaff;--r:#ff3355;--y:#ffcc00;--p:#aa44ff;--c:#00ffee;--t1:#dde0ff;--t2:#8899bb;--td:#3a3a5a;--bd:#1e1e35;--fp:'Press Start 2P',monospace;--fm:'JetBrains Mono',monospace;--fu:'Inter',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--t1);font-family:var(--fu);overflow-x:hidden;width:100%;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);pointer-events:none;z-index:999}
+#app{width:100%;min-height:100vh}
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:linear-gradient(180deg,#0a0a18,transparent);border-bottom:2px solid var(--bd);position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-title{font-family:var(--fp);font-size:14px;color:var(--g);text-shadow:0 0 20px var(--g);letter-spacing:2px;animation:glitch 5s infinite}
+.logo-sub{font-family:var(--fm);font-size:9px;color:var(--t2);margin-top:2px}
+.logo-ver{font-family:var(--fm);font-size:10px;color:var(--t2);align-self:flex-end;margin-bottom:2px}
+.hdr-meta{font-family:var(--fm);font-size:10px;color:var(--td);text-align:right}
+.hdr-meta span{color:var(--y)}
+.tabs{display:flex;background:var(--bg2);border-bottom:2px solid var(--bd);overflow-x:auto}
+.tab{padding:12px 20px;font-family:var(--fp);font-size:8px;color:var(--td);background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;transition:all .15s}
+.tab:hover{color:var(--t2)}.tab.on{color:var(--g);border-bottom-color:var(--g)}
+.main{display:flex;min-height:calc(100vh - 96px);width:100%}
+.area{flex:1;padding:24px;overflow-y:auto;padding-bottom:48px;min-width:0}
+.sidebar{width:360px;background:var(--bg2);border-left:2px solid var(--bd);padding:22px;overflow-y:auto;flex-shrink:0}
+.stitle{font-family:var(--fp);font-size:10px;color:var(--g);margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--bd);text-shadow:0 0 8px rgba(0,255,136,.4)}
+.cost{background:var(--bgc);border:2px solid var(--bd);padding:18px;margin-bottom:22px;text-align:center;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))}
+.cost-lbl{font-family:var(--fp);font-size:8px;color:var(--t2);margin-bottom:10px;letter-spacing:1px}
+.cost-val{font-family:var(--fp);font-size:26px;color:var(--y);text-shadow:0 0 16px rgba(255,204,0,.5);line-height:1}
+.cost-sub{font-family:var(--fm);font-size:12px;color:var(--t2);margin-top:10px}
+.sbars{display:flex;flex-direction:column;gap:18px}
+.sbar-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.sbar-name{font-family:var(--fp);font-size:8px;color:var(--t2);display:flex;align-items:center;gap:6px}
+.sbar-val{font-family:var(--fm);font-size:16px;font-weight:700}
+.sbar-unit{font-size:11px;color:var(--t2);margin-left:3px;font-weight:400}
+.btrack{height:14px;background:#0a0a18;border:1px solid var(--bd);position:relative;overflow:hidden}
+.btrack::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0,transparent 9px,rgba(0,0,0,.25) 9px,rgba(0,0,0,.25) 10px)}
+.bfill{height:100%;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.bg{background:linear-gradient(90deg,#006633,var(--g))}.by{background:linear-gradient(90deg,#664400,var(--y))}.bred{background:linear-gradient(90deg,#660011,var(--r))}.bb{background:linear-gradient(90deg,#003366,var(--b))}.bp{background:linear-gradient(90deg,#330066,var(--p))}
+.sidebar-foot{margin-top:22px;padding-top:14px;border-top:1px solid var(--bd);font-family:var(--fm);font-size:11px;color:var(--td);line-height:1.9}
+.sidebar-empty{padding:40px 0;text-align:center;font-family:var(--fp);font-size:8px;color:var(--td);line-height:2.4}
+.pbar{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;align-items:center}
+.plabel{font-family:var(--fp);font-size:8px;color:var(--t2)}
+.pbtn{padding:9px 14px;font-family:var(--fp);font-size:8px;border:2px solid var(--bd);background:var(--bgc);color:var(--t2);cursor:pointer;transition:all .15s;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px))}
+.pbtn:hover{border-color:var(--b);color:var(--b)}.pbtn.on{border-color:var(--g);color:var(--g);background:rgba(0,255,136,.08)}
+.pprice{font-family:var(--fm);font-size:9px;color:var(--y);display:block;margin-top:3px}
+.clearbtn{padding:9px 12px;font-family:var(--fp);font-size:8px;border:2px solid var(--r);background:rgba(255,51,85,.08);color:var(--r);cursor:pointer;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));margin-left:auto}
+.clearbtn:hover{background:rgba(255,51,85,.2)}
+.shdr{font-family:var(--fp);font-size:9px;color:var(--t2);margin-bottom:14px;padding-bottom:7px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px}
+.shdr::before{content:'▶';color:var(--g);font-size:7px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.full{grid-column:1/-1}
+.slot{background:var(--bgs);border:2px solid var(--bd);padding:14px;position:relative;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));transition:border-color .2s}
+.slot:hover{border-color:#2a2a45}
+.slot-hdr{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.slot-icon{font-size:14px}.slot-lbl{font-family:var(--fp);font-size:7px;color:var(--t2);letter-spacing:1px}
+.slot-price{position:absolute;top:12px;right:12px;font-family:var(--fm);font-size:11px;color:var(--y);opacity:.8}
+select{width:100%;background:var(--bgc);border:2px solid var(--bd);color:var(--t1);font-family:var(--fm);font-size:12px;padding:8px 26px 8px 10px;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2300ff88'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+select:focus{outline:none;border-color:var(--g)}
+select option{background:var(--bgc)}
+.mrow{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+.mlbl{font-family:var(--fp);font-size:7px;color:var(--t2)}
+.cbtn{width:26px;height:26px;background:var(--bgc);border:2px solid var(--bd);color:var(--g);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.cbtn:hover{border-color:var(--g);background:rgba(0,255,136,.1)}
+.cdisp{font-family:var(--fp);font-size:11px;color:var(--c);min-width:24px;text-align:center}
+.nvbadge{display:inline-flex;align-items:center;font-family:var(--fp);font-size:7px;padding:3px 6px;background:rgba(170,68,255,.15);border:1px solid var(--p);color:var(--p);margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.chip{font-family:var(--fm);font-size:10px;padding:3px 7px;background:rgba(255,255,255,.04);border:1px solid var(--bd);color:var(--t2);border-radius:2px}
+.chip.g{color:var(--g);border-color:rgba(0,255,136,.25);background:rgba(0,255,136,.06)}
+.chip.b{color:var(--b);border-color:rgba(0,170,255,.25);background:rgba(0,170,255,.06)}
+.chip.y{color:var(--y);border-color:rgba(255,204,0,.25);background:rgba(255,204,0,.06)}
+.chip.r{color:var(--r);border-color:rgba(255,51,85,.25);background:rgba(255,51,85,.06)}
+.chip.p{color:var(--p);border-color:rgba(170,68,255,.25);background:rgba(170,68,255,.06)}
+.wpanel{display:flex;flex-direction:column;gap:8px;margin-top:18px}
+.wb{padding:10px 14px;border-left:4px solid;font-family:var(--fm);font-size:12px;line-height:1.5}
+.wb.error{background:rgba(255,51,85,.08);border-color:var(--r);color:#ff8899}
+.wb.warn{background:rgba(255,204,0,.06);border-color:var(--y);color:#ffdd66}
+.wb.ok{background:rgba(0,255,136,.06);border-color:var(--g);color:#66ffbb}
+.bwrap{padding:24px 28px;width:100%;max-width:1500px;margin:0 auto;padding-bottom:48px}
+.bgpubar{display:flex;align-items:center;gap:12px;margin-bottom:22px;padding:14px 16px;background:var(--bgc);border:2px solid var(--bd);flex-wrap:wrap}
+.bgpulbl{font-family:var(--fp);font-size:8px;color:var(--t2);white-space:nowrap}
+.bgpusel{flex:1;min-width:200px;background:var(--bgs);border:2px solid var(--bd);color:var(--t1);font-family:var(--fm);font-size:12px;padding:6px 10px;appearance:none}
+.bvbadge{font-family:var(--fp);font-size:8px;color:var(--c);padding:4px 10px;border:1px solid var(--c);background:rgba(0,255,238,.07);white-space:nowrap}
+.btog{display:flex;margin-bottom:18px}
+.tbtn{padding:10px 20px;font-family:var(--fp);font-size:8px;border:2px solid var(--bd);background:var(--bgc);color:var(--td);cursor:pointer;transition:all .15s}
+.tbtn:first-child{border-right:none}.tbtn.on{border-color:var(--g);color:var(--g);background:rgba(0,255,136,.07)}
+.btable{width:100%;border-collapse:collapse}
+.btable th{font-family:var(--fp);font-size:7px;color:var(--td);text-align:left;padding:8px 10px;border-bottom:2px solid var(--bd);white-space:nowrap}
+.btable td{padding:10px;border-bottom:1px solid var(--bd);vertical-align:middle}
+.btable tr:hover td{background:rgba(255,255,255,.02)}
+.mname{font-family:var(--fm);font-size:13px;color:var(--t1);font-weight:700}
+.mdev{font-family:var(--fm);font-size:10px;color:var(--td);margin-top:2px}
+.mtype{display:inline-block;font-family:var(--fm);font-size:9px;color:var(--b);border:1px solid rgba(0,170,255,.2);background:rgba(0,170,255,.05);padding:2px 5px;margin-top:3px}
+.mstr{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}
+.mstri{font-family:var(--fm);font-size:9px;color:var(--td);background:rgba(255,255,255,.03);border:1px solid var(--bd);padding:1px 5px}
+.qtog{display:flex;gap:3px}
+.qbtn{padding:4px 8px;font-family:var(--fp);font-size:7px;border:1px solid var(--bd);background:var(--bgs);color:var(--td);cursor:pointer;transition:all .1s}
+.qbtn:hover{border-color:var(--b);color:var(--b)}.qbtn.on{border-color:var(--c);color:var(--c);background:rgba(0,255,238,.1)}
+.vcel{font-family:var(--fp);font-size:9px;color:var(--y)}
+.spcel{font-family:var(--fm);font-size:11px;font-weight:700}
+.ncel{font-family:var(--fm);font-size:10px;color:var(--td);max-width:170px;line-height:1.4}
+.fitbadge{display:inline-flex;align-items:center;font-family:var(--fp);font-size:6px;padding:3px 6px;white-space:nowrap}
+.fok{background:rgba(0,255,136,.1);border:1px solid var(--g);color:var(--g)}
+.fwarn{background:rgba(255,204,0,.1);border:1px solid var(--y);color:var(--y)}
+.fneed{background:rgba(170,68,255,.1);border:1px solid var(--p);color:var(--p)}
+.fno{background:rgba(255,51,85,.1);border:1px solid var(--r);color:var(--r)}
+.bleg{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px;padding:10px 14px;background:var(--bgc);border:1px solid var(--bd)}
+.blegi{display:flex;align-items:center;gap:5px;font-family:var(--fm);font-size:10px;color:var(--td)}
+.nwrap{padding:24px;width:100%;max-width:1000px;margin:0 auto;padding-bottom:48px}
+.nsvg{background:var(--bg2);border:2px solid var(--bd);overflow:hidden;margin-bottom:14px}
+.nleg{display:flex;flex-wrap:wrap;gap:14px;padding:12px 16px;background:var(--bgc);border:1px solid var(--bd);margin-bottom:14px}
+.nlegi{display:flex;align-items:center;gap:7px;font-family:var(--fm);font-size:10px;color:var(--t2)}
+.nhint{text-align:center;padding:60px 30px;font-family:var(--fp);font-size:9px;color:var(--td);line-height:2.4}
+.vrwrap{padding:24px;width:100%;max-width:1500px;margin:0 auto;padding-bottom:48px}
+.vrgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:22px}
+.vrcard{background:var(--bgc);border:2px solid var(--bd);padding:18px;position:relative;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))}
+.vrcard.rec{border-color:var(--g);box-shadow:0 0 16px rgba(0,255,136,.08)}.vrcard.tba{opacity:.65;border-style:dashed}
+.vrname{font-family:var(--fp);font-size:8px;color:var(--t1);margin-bottom:8px;padding-right:80px}
+.vrprice{font-family:var(--fp);font-size:15px;color:var(--y);text-shadow:0 0 8px rgba(255,204,0,.3);margin-bottom:14px}
+.vrbr{margin-bottom:8px}
+.vrbl{font-family:var(--fp);font-size:6px;color:var(--t2);display:flex;justify-content:space-between;margin-bottom:3px}
+.vrbt{height:7px;background:var(--bgs);border:1px solid var(--bd)}.vrbf{height:100%;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.vrsg{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:12px 0}
+.vrsi{font-family:var(--fm);font-size:10px;color:var(--t2)}.vrsi b{color:var(--t1);font-weight:700}
+.vrpc{display:flex;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)}.vrpros,.vrcons{flex:1}
+.vrpt{font-family:var(--fp);font-size:6px;color:var(--g);margin-bottom:5px}.vrct{font-family:var(--fp);font-size:6px;color:var(--r);margin-bottom:5px}
+.vri{font-family:var(--fm);font-size:9px;color:var(--t2);margin-bottom:3px;padding-left:5px}
+.vrnote{font-family:var(--fm);font-size:9px;color:var(--td);margin-top:4px;font-style:italic}
+.vrrec{position:absolute;top:12px;right:12px;font-family:var(--fp);font-size:6px;color:var(--g);background:rgba(0,255,136,.1);border:1px solid var(--g);padding:3px 6px}
+.vrtba{position:absolute;top:12px;right:12px;font-family:var(--fp);font-size:6px;color:var(--p);background:rgba(170,68,255,.1);border:1px solid var(--p);padding:3px 6px}
+.cwrap{padding:24px;width:100%;max-width:1300px;margin:0 auto;padding-bottom:48px}
+.ccols{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+.ccol{background:var(--bg2);border:2px solid var(--bd);padding:18px}
+.ccolhdr{font-family:var(--fp);font-size:8px;color:var(--b);margin-bottom:12px;padding-bottom:7px;border-bottom:1px solid var(--bd)}
+.csel{width:100%;background:var(--bgc);border:2px solid var(--bd);color:var(--t1);font-family:var(--fm);font-size:12px;padding:8px 10px;margin-bottom:14px;appearance:none}
+.crows{display:flex;flex-direction:column;gap:3px;margin-bottom:14px}
+.crow{display:flex;justify-content:space-between;padding:5px 8px;background:var(--bgc);border-left:2px solid var(--bd);font-family:var(--fm);font-size:10px}
+.clbl{color:var(--td)}.cval{color:var(--t1);font-size:10px}
+.pgwrap{padding:24px;width:100%;max-width:1500px;margin:0 auto;padding-bottom:48px}
+.pggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(460px,1fr));gap:18px}
+.pgcard{background:var(--bgc);border:2px solid var(--bd);padding:20px;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px))}
+.pgcard:hover{border-color:#2a2a48}
+.pgemoji{font-size:28px;margin-bottom:10px}.pgname{font-family:var(--fp);font-size:10px;color:var(--t1);margin-bottom:4px}
+.pgdesc{font-family:var(--fm);font-size:11px;color:var(--t2);margin-bottom:12px}
+.pgprice{font-family:var(--fp);font-size:16px;color:var(--y);text-shadow:0 0 10px rgba(255,204,0,.3);margin-bottom:14px}
+.pgchips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:16px}
+.loadbtn{width:100%;padding:11px;font-family:var(--fp);font-size:7px;background:rgba(0,255,136,.08);border:2px solid var(--g);color:var(--g);cursor:pointer;transition:all .2s;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))}
+.loadbtn:hover{background:rgba(0,255,136,.18)}
+.revs{margin-top:16px;padding-top:12px;border-top:1px solid var(--bd)}
+.revtit{font-family:var(--fp);font-size:7px;color:var(--t2);margin-bottom:10px}
+.rev{padding:10px 12px;background:var(--bgs);margin-bottom:8px;border-left:3px solid}
+.rev.positive{border-color:var(--g)}.rev.negative{border-color:var(--r)}.rev.mixed{border-color:var(--y)}
+.revhdr{display:flex;justify-content:space-between;margin-bottom:6px}
+.revauth{font-family:var(--fp);font-size:6px;color:var(--t2);display:flex;align-items:center;gap:5px}
+.revdate{font-family:var(--fm);font-size:9px;color:var(--td)}
+.revtxt{font-family:var(--fm);font-size:10px;color:var(--t2);line-height:1.55;margin-bottom:6px}
+.revftr{display:flex;justify-content:space-between;align-items:center}
+.revstars{color:var(--y);font-size:10px}
+.revlink{font-family:var(--fp);font-size:6px;color:var(--b);text-decoration:none}.revlink:hover{color:var(--c)}
+@keyframes glitch{0%,90%,100%{transform:none}92%{transform:translateX(-2px)}94%{transform:translateX(2px)}96%{transform:translateX(-1px)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bd)}
+@media(max-width:900px){.main{flex-direction:column}.sidebar{width:100%}.grid{grid-template-columns:1fr}.full{grid-column:auto}.ccols{grid-template-columns:1fr}.pggrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script>
+const{useState,useEffect,useRef,createElement:h}=React;
+const META={ver:"3.0.0",date:"2026-06-15"};
+const GPUS=[
+  {id:"rtx5090",name:"RTX 5090",arch:"Blackwell",vram:32,vtype:"GDDR7",tdp:575,nvlink:false,price:2500,tops:3352,notes:"Флагман потребительского сегмента. NVLink не поддерживается. Multi-GPU только через PCIe (~64 GB/s)."},
+  {id:"pro6000ws",name:"RTX PRO 6000 WS",arch:"Blackwell",vram:96,vtype:"GDDR7 ECC",tdp:600,nvlink:true,nvbw:1800,price:12099,tops:4000,avail:"⚠️ ДЕФИЦИТ",notes:"NVLink 5 (1800 GB/s). Идеально для multi-GPU AI-сервера."},
+  {id:"pro6000mq",name:"RTX PRO 6000 Max-Q",arch:"Blackwell",vram:96,vtype:"GDDR7 ECC",tdp:300,cooling:"passive",nvlink:true,nvbw:1800,price:9000,tops:3600,notes:"Пассивное охлаждение 300W. 2–4 штуки в серверный корпус."},
+];
+const CPUS=[
+  {id:"r9800x3d",name:"Ryzen 9 9800X3D",socket:"AM5",cores:8,threads:16,boost:5.2,tdp:120,price:479},
+  {id:"tr7960x",name:"Threadripper 7960X",socket:"TRX50",cores:24,threads:48,boost:5.3,tdp:350,price:1299},
+  {id:"tr7970x",name:"Threadripper 7970X",socket:"TRX50",cores:32,threads:64,boost:5.3,tdp:350,price:2499},
+  {id:"cu9285k",name:"Core Ultra 9 285K",socket:"LGA1851",cores:24,threads:24,boost:5.7,tdp:250,price:589},
+];
+const MBS=[
+  {id:"x870e",name:"ROG Crosshair X870E Apex",socket:"AM5",slots:2,gen:5,maxram:192,rtype:"DDR5",price:699},
+  {id:"trx50",name:"Pro WS TRX50-SAGE WIFI",socket:"TRX50",slots:7,gen:5,maxram:2048,rtype:"DDR5 ECC",price:1099},
+  {id:"z890",name:"ProArt Z890-CREATOR WIFI",socket:"LGA1851",slots:2,gen:5,maxram:192,rtype:"DDR5",price:599},
+];
+const RAMS=[
+  {id:"gs64",name:"G.Skill 64GB DDR5-6400",type:"DDR5",gb:64,mhz:6400,ecc:false,price:280},
+  {id:"gs128",name:"G.Skill 128GB DDR5-6400",type:"DDR5",gb:128,mhz:6400,ecc:false,price:520},
+  {id:"gs192e",name:"G.Skill 192GB DDR5-6400 ECC",type:"DDR5 ECC",gb:192,mhz:6400,ecc:true,price:1349},
+  {id:"sm256e",name:"Samsung 256GB DDR5 ECC",type:"DDR5 ECC",gb:256,mhz:5600,ecc:true,price:1800},
+];
+const PSUS=[
+  {id:"hx1000",name:"Corsair HX1000i 1000W",w:1000,eff:"80+ Platinum",price:239},
+  {id:"hx1200",name:"Corsair HX1200i 1200W",w:1200,eff:"80+ Platinum",price:289},
+  {id:"ax1600",name:"Corsair AX1600i 1600W",w:1600,eff:"80+ Titanium",price:609},
+  {id:"bq1500",name:"be quiet! Dark Power 13 1500W",w:1500,eff:"80+ Titanium",price:529},
+];
+const STORS=[
+  {id:"990p2",name:"Samsung 990 Pro 2TB NVMe",tb:2,read:7450,price:159},
+  {id:"990p4",name:"Samsung 990 Pro 4TB NVMe",tb:4,read:7450,price:299},
+  {id:"sn8",name:"WD Black SN850P 8TB NVMe",tb:8,read:7300,price:699},
+];
+const VRS=[
+  {id:"bb2",name:"Bigscreen Beyond 2",price:999,g:127,res:"2560×2560",fov:116,hz:120,wifi:false,sa:false,pcvr:true,eye:false,hand:false,rec:true,tba:false,sr:82,sw:100,sf:83,notes:"Самый лёгкий VR-шлем (127г).",pros:["Сверхлёгкий","Острая картинка","Кастомная подгонка"],cons:["Только PCVR","Нет eye/hand tracking","Дорого"]},
+  {id:"mq3",name:"Meta Quest 3",price:499,g:515,res:"2064×2208",fov:110,hz:120,wifi:true,sa:true,pcvr:true,eye:false,hand:true,rec:false,tba:false,sr:72,sw:62,sf:79,notes:"Лучший баланс цена/качество. Standalone + PCVR.",pros:["Доступная цена","Standalone + PCVR","Hand tracking"],cons:["Средняя резкость по краям","Сжатие Wi-Fi"]},
+  {id:"pcs",name:"Pimax Crystal Super",price:1499,g:860,res:"3552×3840",fov:140,hz:120,wifi:false,sa:false,pcvr:true,eye:true,hand:false,rec:false,tba:false,sr:100,sw:14,sf:100,notes:"Максимальное разрешение. FOV 140°.",pros:["Лучшее разрешение","FOV 140°","Eye tracking"],cons:["860г — очень тяжёлый","Только PCVR","Требует RTX 5090+"]},
+  {id:"avp",name:"Apple Vision Pro",price:3499,g:600,res:"3386×3070",fov:90,hz:100,wifi:true,sa:true,pcvr:false,eye:true,hand:true,rec:false,tba:false,sr:95,sw:55,sf:65,notes:"Micro-OLED дисплей. Только macOS.",pros:["Micro-OLED","Eye+hand tracking"],cons:["Не с Windows","Очень дорого","Нет Steam"]},
+  {id:"vsf",name:"Valve Steam Frame",price:null,g:null,res:"TBA",fov:null,hz:120,wifi:true,sa:false,pcvr:true,eye:true,hand:true,rec:false,tba:true,notes:"Ожидается 2026. Беспроводной PCVR.",pros:["Беспроводной PCVR","Steam интеграция"],cons:["Нет данных","Дата неизвестна"]},
+];
+const PRESETS=[
+  {id:"ai_coder",name:"AI CODER",e:"🟢",desc:"Стартовая AI workstation — кодинг и небольшие модели",gpu:"rtx5090",n:1,cpu:"r9800x3d",mb:"x870e",ram:"gs64",psu:"hx1200",stor:"990p2",price:5500},
+  {id:"video_studio",name:"VIDEO STUDIO",e:"🔵",desc:"96GB VRAM — все видеомодели без квантования",gpu:"pro6000ws",n:1,cpu:"r9800x3d",mb:"x870e",ram:"gs128",psu:"hx1000",stor:"990p4",price:16000},
+  {id:"dual_5090",name:"DUAL 5090",e:"🟡",desc:"64GB суммарно — MIT HAN Lab build",gpu:"rtx5090",n:2,cpu:"tr7960x",mb:"trx50",ram:"gs192e",psu:"ax1600",stor:"sn8",price:11600},
+  {id:"mini_server",name:"MINI SERVER",e:"🔴",desc:"4× GPU пассивное охл. — 384GB VRAM",gpu:"pro6000mq",n:4,cpu:"tr7970x",mb:"trx50",ram:"sm256e",psu:"ax1600",stor:"sn8",price:45000},
+];
+const REVIEWS={
+  dual_5090:[
+    {id:"r1",auth:"MIT HAN Lab",plat:"Блог MIT",icon:"🎓",txt:"RTX 5090 ×2 + Threadripper 7960X + 192GB DDR5-ECC. Blackwell SM120 требует torch nightly + CUDA 13.0.1. Рекомендуют Debian 12.",s:"positive",stars:5,url:"https://hanlab.mit.edu/blog/rtx5090",date:"2025-Q1",v:true},
+    {id:"r2",auth:"ArsenalPC Lab",plat:"Newegg Community",icon:"🛒",txt:"Dual RTX 5090: 6704 AI TOPS. Температура — 82°C / 77°C. Узкое место — PCIe bandwidth для 70B+ моделей.",s:"positive",stars:5,url:"https://www.newegg.com/gamer/community/t/our-new-ai-workstation-is-complete-and-its-alive/5423",date:"2025",v:true},
+  ],
+  video_studio:[
+    {id:"r3",auth:"Doug (verified)",plat:"B&H Photo",icon:"📷",txt:"RTX PRO 6000 96GB: DaVinci Resolve — время рендера 5.5ч → 1ч. Работает со всеми моделями в Ollama.",s:"positive",stars:5,url:"https://www.bhphotovideo.com/c/product/1895402-REG/nvidia_900_5g144_2200_000_rtx_pro_6000_blackwell.html",date:"2025-09",v:true},
+    {id:"r4",auth:"Puget Systems",plat:"TechRadar",icon:"📰",txt:"RTX 5090 в Premiere Pro: +9% vs 4090. DaVinci: +17%. After Effects 3D: +35%.",s:"positive",stars:4,url:"https://www.techradar.com/pro/usd2000-nvidia-geforce-rtx-5090-gets-tested-on-creative-software",date:"2025-01",v:true},
+  ],
+  ai_coder:[
+    {id:"r5",auth:"localprompt.ai",plat:"HuggingFace",icon:"🤗",txt:"RTX 5090 + Debian 12: DeepSeek-Coder Q8_0 — лучший offline кодинг. sm_120 требует torch nightly. 60-80 tok/s при Q4.",s:"positive",stars:4,url:"https://discuss.huggingface.co/t/local-llm-and-ml-platform-with-rtx-5090-gpu/166394",date:"2025",v:true},
+  ],
+  mini_server:[],
+};
+const QORD=["FP16","FP8","Q8","Q4"];
+const QQ={FP16:5,FP8:4,Q8:4,Q4:3};
+const VMODELS=[
+  {id:"wan22",name:"Wan 2.2 14B",dev:"Wan Team",type:"T2V+I2V",p:14,res:"720p",dur:"10s",str:["Стабильность камеры","Прорисовка рук","Кинематографичность"],q:{FP16:{v:54,sp:null,n:"Нужно 96GB+"},FP8:{v:27,sp:125,n:"Рекомендуется + sageattn3"},Q8:{v:24,sp:140,n:null},Q4:{v:6,sp:90,n:"480p, потеря качества"}}},
+  {id:"hun15",name:"HunyuanVideo 1.5",dev:"Tencent",type:"T2V+I2V",p:8.3,res:"720p",dur:"10s",str:["Лучшие лица","Легче Wan"],q:{FP16:{v:26,sp:90,n:"✅ Влезает на RTX 5090!"},FP8:{v:15,sp:60,n:null},Q8:{v:12,sp:55,n:null},Q4:{v:8,sp:75,n:"Distilled"}}},
+  {id:"ltx23",name:"LTX-2.3 22B",dev:"Lightricks",type:"T2V+I2V+Audio",p:22,res:"4K",dur:"20s",str:["Самый быстрый","4K 50fps","Аудио+видео"],q:{FP16:{v:48,sp:22,n:"Частично на диске"},FP8:{v:24,sp:22,n:"✅ Влезает RTX 5090"},Q8:{v:20,sp:25,n:null},Q4:{v:14,sp:30,n:null}}},
+  {id:"cogvx",name:"CogVideoX-5B",dev:"Zhipu AI",type:"T2V",p:5,res:"480p",dur:"6s",str:["Работает на 12GB","Apache 2.0"],q:{FP16:{v:12,sp:30,n:null},FP8:{v:6,sp:25,n:null},Q8:{v:5,sp:22,n:null},Q4:{v:4,sp:18,n:"Артефакты заметны"}}},
+  {id:"adiff",name:"AnimateDiff",dev:"Stability AI",type:"I2V (loops)",p:1.5,res:"512p",dur:"4s",str:["8GB минимум","Петли/анимации"],q:{FP16:{v:8,sp:15,n:null},FP8:{v:5,sp:11,n:null},Q8:{v:4,sp:10,n:null},Q4:{v:3,sp:8,n:null}}},
+];
+const LMODELS=[
+  {id:"l70",name:"Llama 3.3 70B",dev:"Meta",p:70,cat:"General LLM",str:["Топ открытых LLM","Отличный кодинг"],q:{FP16:{v:140,s5:null,sp:null,n:"Нужно 2× PRO 6000"},FP8:{v:75,s5:null,sp:50,n:"1× PRO 6000"},Q8:{v:75,s5:null,sp:50,n:null},Q4:{v:40,s5:47,sp:90,n:"2× RTX 5090 или 1× PRO 6000"}}},
+  {id:"l8",name:"Llama 3 8B",dev:"Meta",p:8,cat:"General LLM",str:["Быстрый","Лёгкий"],q:{FP16:{v:16,s5:500,sp:900,n:null},FP8:{v:8,s5:800,sp:1400,n:null},Q8:{v:8,s5:750,sp:1300,n:null},Q4:{v:5,s5:1200,sp:2100,n:"Рекомендуется"}}},
+  {id:"dsv3",name:"DeepSeek V3 (MoE)",dev:"DeepSeek",p:671,cat:"Coding / MoE",str:["Лучший кодинг","MoE ~37B активных"],q:{FP16:{v:400,s5:null,sp:null,n:"Нереально"},FP8:{v:200,s5:null,sp:null,n:"4× PRO 6000"},Q8:{v:70,s5:null,sp:55,n:"1× PRO 6000"},Q4:{v:35,s5:60,sp:120,n:"2× RTX 5090 или 1× PRO 6000"}}},
+  {id:"q72",name:"Qwen 2.5 72B",dev:"Alibaba",p:72,cat:"General LLM",str:["Лучший math/code","128K контекст"],q:{FP16:{v:144,s5:null,sp:null,n:"2× PRO 6000"},FP8:{v:72,s5:null,sp:52,n:"1× PRO 6000"},Q8:{v:72,s5:null,sp:50,n:null},Q4:{v:40,s5:45,sp:85,n:"2× RTX 5090 или 1× PRO 6000"}}},
+  {id:"g27",name:"Gemma 3 27B",dev:"Google",p:27,cat:"Multimodal",str:["Мультимодальность","Компактный"],q:{FP16:{v:54,s5:null,sp:120,n:"Только PRO 6000"},FP8:{v:27,s5:100,sp:200,n:"✅ Влезает RTX 5090!"},Q8:{v:27,s5:95,sp:185,n:null},Q4:{v:16,s5:160,sp:300,n:"Рекомендуется"}}},
+  {id:"m7",name:"Mistral 7B",dev:"Mistral AI",p:7,cat:"General LLM",str:["Очень быстрый"],q:{FP16:{v:14,s5:600,sp:1100,n:null},FP8:{v:7,s5:900,sp:1600,n:null},Q8:{v:7,s5:850,sp:1500,n:null},Q4:{v:5,s5:1100,sp:2000,n:"Лучший баланс скорость/качество"}}},
+];
+const MAX={ai:8425,video:600,vram:384,power:3000,bw:1800};
+
+function compat(b){
+  const w=[];const{gpu,n,cpu,mb,ram,psu}=b;
+  if(!gpu||!cpu||!mb)return w;
+  if(cpu.socket!==mb.socket)w.push({t:"error",m:"⛔ СОКЕТ: CPU "+cpu.socket+" ≠ MB "+mb.socket});
+  if(n>mb.slots)w.push({t:"error",m:"⛔ PCIe СЛОТЫ: нужно "+n+"×, доступно "+mb.slots});
+  if(psu){const tdp=gpu.tdp*n+cpu.tdp;const req=Math.ceil(tdp*1.25);
+    if(psu.w<tdp)w.push({t:"error",m:"⛔ МОЩНОСТЬ: PSU "+psu.w+"W < "+tdp+"W"});
+    else if(psu.w<req)w.push({t:"warn",m:"⚠️ МОЩНОСТЬ: PSU "+psu.w+"W на пределе! Нужно "+req+"W"});}
+  if(n>=2&&!gpu.nvlink)w.push({t:"warn",m:"⚠️ MULTI-GPU без NVLink: ~64 GB/s — bottleneck для 70B+ моделей."});
+  if(ram&&mb){const a=mb.rtype.toLowerCase().replace(" ecc","");const b2=ram.type.toLowerCase().replace(" ecc","");
+    if(a!==b2)w.push({t:"warn",m:"⚠️ RAM: плата — "+mb.rtype+", выбрана — "+ram.type});}
+  if(gpu.cooling==="passive")w.push({t:"ok",m:"ℹ️ RTX PRO 6000 Max-Q — пассивное охлаждение. Нужен корпус с продувом."});
+  if(w.filter(x=>x.t==="error").length===0)w.push({t:"ok",m:"✅ Совместимость OK — конфигурация рабочая!"});
+  return w;
+}
+function calcStats(b){
+  const{gpu,n}=b;if(!gpu)return null;
+  const vram=gpu.vram*n;const tdp=gpu.tdp*n+(b.cpu?b.cpu.tdp:0);
+  const nv=gpu.nvlink&&n>1;const bw=nv?gpu.nvbw*(n-1):(n>1?64:0);
+  const isPro=gpu.id==="pro6000ws"||gpu.id==="pro6000mq";
+  const ai=isPro?(nv?gpu.tops*n*0.95:gpu.tops):(n>1?gpu.tops*n*0.62:gpu.tops);
+  const video=isPro?520*n:280*n;
+  const cost=(gpu?gpu.price:0)*n+(b.cpu?b.cpu.price:0)+(b.mb?b.mb.price:0)+(b.ram?b.ram.price:0)+(b.psu?b.psu.price:0)+(b.stor?b.stor.price:0);
+  return{ai:Math.min(ai,MAX.ai),video:Math.min(video,MAX.video),vram,tdp,thermal:Math.min(100,Math.round(tdp/3000*100)),bw,cost};
+}
+
+function PixelLogo(){
+  const px=[[0,1,1,1,1,0],[1,1,1,1,1,1],[1,0,1,1,0,1],[1,1,1,1,1,1],[0,1,1,1,1,0],[0,0,1,1,0,0]];
+  return h('div',{style:{display:'grid',gridTemplateColumns:'repeat(6,7px)',gap:'1px'}},
+    px.flat().map((p,i)=>h('div',{key:i,style:{width:7,height:7,background:p?'var(--g)':'transparent',boxShadow:p?'0 0 4px var(--g)':'none'}}))
+  );
+}
+
+function StatBar({emoji,label,val,max,unit,col,prev}){
+  const pct=Math.min(100,Math.round(val/max*100));
+  const c=pct>=80?'bg':pct>=50?'by':'bred';
+  const chg=prev!=null&&val!==prev;const up=chg&&val>prev;
+  return h('div',{className:'sbar-item'},
+    h('div',{className:'sbar-hdr'},
+      h('span',{className:'sbar-name'},emoji+' '+label+(chg?h('span',{style:{fontFamily:'var(--fp)',fontSize:'7px',marginLeft:4,color:up?'var(--g)':'var(--r)'}},up?'▲':'▼'):'')),
+      h('span',{className:'sbar-val',style:{color:col||(pct>=80?'var(--g)':pct>=50?'var(--y)':'var(--r)')}},
+        (typeof val==='number'?val.toLocaleString():val),
+        unit&&h('span',{className:'sbar-unit'},unit)
+      )
+    ),
+    h('div',{className:'btrack'},h('div',{className:'bfill '+c,style:{width:pct+'%'}}))
+  );
+}
+
+function Slot({icon,label,opts,val,onChange,info,price}){
+  return h('div',{className:'slot'},
+    h('div',{className:'slot-hdr'},h('span',{className:'slot-icon'},icon),h('span',{className:'slot-lbl'},label)),
+    price&&h('div',{className:'slot-price'},'$'+price.toLocaleString()),
+    h('select',{value:val||'',onChange:e=>onChange(e.target.value||null)},
+      h('option',{value:''},'— выбрать —'),
+      opts.map(o=>h('option',{key:o.id,value:o.id},o.name))
+    ),
+    info&&info()
+  );
+}
+function Chips({items}){return h('div',{className:'chips'},items.map((c,i)=>h('span',{key:i,className:'chip '+(c.cl||'')},c.t)));}
+
+function BuildView({build,setBuild,ap,setAp}){
+  const pr=useRef(null);
+  const gpu=GPUS.find(g=>g.id===build.gpu)||null;
+  const cpu=CPUS.find(c=>c.id===build.cpu)||null;
+  const mb=MBS.find(m=>m.id===build.mb)||null;
+  const ram=RAMS.find(r=>r.id===build.ram)||null;
+  const psu=PSUS.find(p=>p.id===build.psu)||null;
+  const stor=STORS.find(s=>s.id===build.stor)||null;
+  const fb={gpu,n:build.n,cpu,mb,ram,psu,stor};
+  const st=calcStats(fb);const ws=compat(fb);
+  const pst=pr.current;useEffect(()=>{pr.current=st;},[JSON.stringify(st)]);
+  const load=p=>{setAp(p.id);setBuild({gpu:p.gpu,n:p.n,cpu:p.cpu,mb:p.mb,ram:p.ram,psu:p.psu,stor:p.stor});};
+  const clr=()=>{setAp(null);setBuild({gpu:null,n:1,cpu:null,mb:null,ram:null,psu:null,stor:null});};
+  const set=(f,v)=>{setAp(null);setBuild(b=>({...b,[f]:v}));};
+  const cost=st?st.cost:0;
+  return h('div',{className:'main'},
+    h('div',{className:'area'},
+      h('div',{className:'pbar'},
+        h('span',{className:'plabel'},'ПРЕСЕТЫ:'),
+        PRESETS.map(p=>h('button',{key:p.id,className:'pbtn '+(ap===p.id?'on':''),onClick:()=>load(p)},p.e+' '+p.name,h('span',{className:'pprice'},'~$'+p.price.toLocaleString()))),
+        h('button',{className:'clearbtn',onClick:clr},'✕ СБРОС')
+      ),
+      h('div',{className:'shdr'},'КОМПОНЕНТЫ СБОРКИ'),
+      h('div',{className:'grid'},
+        h('div',{className:'slot full'},
+          h('div',{className:'slot-hdr'},h('span',{className:'slot-icon'},'🎮'),h('span',{className:'slot-lbl'},'GPU — ВИДЕОКАРТА')),
+          gpu&&h('div',{className:'slot-price'},'$'+(gpu.price*build.n).toLocaleString()),
+          h('select',{value:build.gpu||'',onChange:e=>set('gpu',e.target.value||null)},
+            h('option',{value:''},'— выбрать GPU —'),
+            GPUS.map(g=>h('option',{key:g.id,value:g.id},g.name+' — $'+g.price.toLocaleString()+' — '+g.vram+'GB VRAM'))
+          ),
+          h('div',{className:'mrow'},
+            h('span',{className:'mlbl'},'КОЛ-ВО:'),
+            h('button',{className:'cbtn',onClick:()=>set('n',Math.max(1,build.n-1))},'−'),
+            h('span',{className:'cdisp'},build.n+'×'),
+            h('button',{className:'cbtn',onClick:()=>set('n',Math.min(4,build.n+1))},'+'),
+            gpu&&build.n>1&&gpu.nvlink&&h('span',{className:'nvbadge'},'✦ NVLink 1800 GB/s'),
+            gpu&&build.n>1&&!gpu.nvlink&&h('span',{className:'chip y'},'⚠️ PCIe — bottleneck при 70B+')
+          ),
+          gpu&&h(Chips,{items:[
+            {t:gpu.vram*build.n+'GB VRAM',cl:'g'},{t:gpu.vtype,cl:'b'},{t:gpu.arch},
+            {t:gpu.tdp*build.n+'W TDP',cl:'y'},{t:(gpu.tops*build.n).toLocaleString()+' AI TOPS',cl:'y'},
+            ...(gpu.nvlink?[{t:'NVLink ✓',cl:'p'}]:[]),
+            ...(gpu.cooling==='passive'?[{t:'🔇 Passive'}]:[]),
+            ...(gpu.avail?[{t:gpu.avail,cl:'r'}]:[]),
+          ]})
+        ),
+        h(Slot,{icon:'🧠',label:'CPU — ПРОЦЕССОР',opts:CPUS.map(c=>({id:c.id,name:c.name+' — $'+c.price+' — '+c.socket})),val:build.cpu,onChange:v=>set('cpu',v),price:cpu?.price,info:()=>cpu&&h(Chips,{items:[{t:cpu.socket},{t:cpu.cores+'C/'+cpu.threads+'T'},{t:cpu.tdp+'W',cl:'y'},{t:cpu.boost+'GHz',cl:'b'}]})}),
+        h(Slot,{icon:'🔌',label:'MOTHERBOARD',opts:MBS.map(m=>({id:m.id,name:m.name+' — $'+m.price+' — '+m.socket})),val:build.mb,onChange:v=>set('mb',v),price:mb?.price,info:()=>mb&&h(Chips,{items:[{t:mb.socket},{t:mb.slots+'× PCIe x16'},{t:'Gen'+mb.gen,cl:'b'},{t:mb.maxram+'GB max'}]})}),
+        h(Slot,{icon:'💾',label:'RAM — ПАМЯТЬ',opts:RAMS.map(r=>({id:r.id,name:r.name+' — $'+r.price})),val:build.ram,onChange:v=>set('ram',v),price:ram?.price,info:()=>ram&&h(Chips,{items:[{t:ram.gb+'GB',cl:'g'},{t:ram.type,cl:'b'},{t:ram.mhz+' MHz'},...(ram.ecc?[{t:'ECC',cl:'p'}]:[])]})}),
+        h(Slot,{icon:'⚡',label:'PSU — БЛОК ПИТАНИЯ',opts:PSUS.map(p=>({id:p.id,name:p.name+' — $'+p.price})),val:build.psu,onChange:v=>set('psu',v),price:psu?.price,info:()=>psu&&h(Chips,{items:[{t:psu.w+'W',cl:'g'},{t:psu.eff,cl:'b'}]})}),
+        h(Slot,{icon:'💿',label:'STORAGE',opts:STORS.map(s=>({id:s.id,name:s.name+' — $'+s.price})),val:build.stor,onChange:v=>set('stor',v),price:stor?.price,info:()=>stor&&h(Chips,{items:[{t:stor.tb+'TB',cl:'g'},{t:stor.read+' MB/s',cl:'b'}]})})
+      ),
+      ws.length>0&&h('div',{className:'wpanel'},
+        h('div',{className:'shdr',style:{marginTop:16}},'ДИАГНОСТИКА СОВМЕСТИМОСТИ'),
+        ws.map((w,i)=>h('div',{key:i,className:'wb '+w.t},w.m))
+      ),
+      gpu?.notes&&h('div',{style:{marginTop:12,padding:'10px 14px',background:'rgba(255,255,255,.02)',border:'1px solid var(--bd)',fontFamily:'var(--fm)',fontSize:'12px',color:'var(--t2)',lineHeight:'1.6'}},'ℹ️ '+gpu.notes)
+    ),
+    h('div',{className:'sidebar'},
+      h('div',{className:'stitle'},'// ХАРАКТЕРИСТИКИ'),
+      h('div',{className:'cost'},
+        h('div',{className:'cost-lbl'},'СТОИМОСТЬ СБОРКИ'),
+        h('div',{className:'cost-val'},'$'+cost.toLocaleString()),
+        gpu&&h('div',{className:'cost-sub'},'GPU: $'+(gpu.price*build.n).toLocaleString()+(cpu?' · CPU: $'+cpu.price:''))
+      ),
+      st?h('div',{className:'sbars'},
+        h(StatBar,{emoji:'🧠',label:'AI PERFORMANCE',val:Math.round(st.ai),max:MAX.ai,unit:'TOPS',prev:pst?.ai}),
+        h(StatBar,{emoji:'🎬',label:'VIDEO GEN',val:Math.round(st.video),max:MAX.video,unit:'pts',prev:pst?.video}),
+        h(StatBar,{emoji:'📦',label:'VRAM TOTAL',val:st.vram,max:MAX.vram,unit:'GB',col:'var(--b)',prev:pst?.vram}),
+        h(StatBar,{emoji:'⚡',label:'POWER DRAW',val:st.tdp,max:MAX.power,unit:'W',prev:pst?.tdp}),
+        h(StatBar,{emoji:'🌡️',label:'THERMAL',val:st.thermal,max:100,unit:'%',prev:pst?.thermal}),
+        st.bw>0&&h(StatBar,{emoji:'🔗',label:'GPU BANDWIDTH',val:st.bw,max:MAX.bw,unit:'GB/s',col:'var(--p)',prev:pst?.bw})
+      ):h('div',{className:'sidebar-empty'},'ВЫБЕРИ GPU ДЛЯ НАЧАЛА'),
+      h('div',{className:'sidebar-foot'},'DATA: '+META.date,h('br'),'PCForge '+META.ver)
+    )
+  );
+}
+
+function NodeView({build}){
+  const gpu=GPUS.find(g=>g.id===build.gpu)||null;
+  const cpu=CPUS.find(c=>c.id===build.cpu)||null;
+  const mb=MBS.find(m=>m.id===build.mb)||null;
+  const ram=RAMS.find(r=>r.id===build.ram)||null;
+  const psu=PSUS.find(p=>p.id===build.psu)||null;
+  const stor=STORS.find(s=>s.id===build.stor)||null;
+  const n=build.n;
+  const bneck=!!(gpu&&n>1&&!gpu.nvlink);
+  const sockErr=!!(cpu&&mb&&cpu.socket!==mb.socket);
+  const tdp=(gpu?gpu.tdp:0)*n+(cpu?cpu.tdp:0);
+  const psuWarn=!!(psu&&psu.w<tdp*1.25);
+  const none=!gpu&&!cpu&&!mb;
+  const N={
+    cpu:{x:55,y:50,w:130,h:50,lbl:'CPU',icon:'🧠',col:'var(--c)',comp:cpu,info:cpu?cpu.cores+'C · '+cpu.boost+'GHz':null,sub:cpu?.socket},
+    gpu:{x:540,y:50,w:150,h:50,lbl:'GPU',icon:'🎮',col:'var(--g)',comp:gpu,info:gpu?(gpu.vram*n)+'GB VRAM':null,sub:n>1?'×'+n+' '+(gpu?.nvlink?'NVLink':'PCIe'):gpu?.arch},
+    mb:{x:285,y:180,w:150,h:55,lbl:'MOBO',icon:'🔌',col:'var(--b)',comp:mb,info:mb?mb.slots+'× PCIe x16':null,sub:mb?.socket},
+    ram:{x:550,y:185,w:135,h:45,lbl:'RAM',icon:'💾',col:'var(--p)',comp:ram,info:ram?ram.gb+'GB':null,sub:ram?'DDR5-'+ram.mhz:null},
+    stor:{x:55,y:275,w:130,h:50,lbl:'STORAGE',icon:'💿',col:'var(--y)',comp:stor,info:stor?stor.tb+'TB NVMe':null,sub:stor?stor.read+'MB/s':null},
+    psu:{x:285,y:325,w:150,h:44,lbl:'PSU',icon:'⚡',col:'var(--t2)',comp:psu,info:psu?psu.w+'W':null,sub:psu?.eff},
+  };
+  const conns=[
+    {key:'cm',path:'M120,100 L120,207 L285,207',lbl:cpu&&mb?(cpu.socket===mb.socket?cpu.socket:'⛔ '+cpu.socket+'≠'+mb.socket):'CPU BUS',lx:202,ly:201,col:sockErr?'var(--r)':'var(--c)',bn:sockErr,on:!!(cpu&&mb)},
+    {key:'gm',path:'M615,100 L615,207 L435,207',lbl:gpu?(gpu.nvlink&&n>1?'NVLink 1800GB/s':n>1?'PCIe 64GB/s':'PCIe Gen5 x16'):'PCIe',lx:525,ly:201,col:bneck?'var(--r)':'var(--g)',bn:bneck,on:!!(gpu&&mb)},
+    {key:'rm',path:'M550,207 L435,207',lbl:ram?'DDR5-'+ram.mhz:'DDR5',lx:492,ly:201,col:'var(--p)',bn:false,on:!!(ram&&mb)},
+    {key:'sm',path:'M120,275 L120,225 L285,225',lbl:stor?'NVMe '+(stor.read/1000).toFixed(1)+'GB/s':'NVMe',lx:202,ly:219,col:'var(--y)',bn:false,on:!!(stor&&mb)},
+    {key:'pm',path:'M360,325 L360,235',lbl:psu?psu.w+'W':'POWER',lx:360,ly:282,col:psuWarn?'var(--r)':'var(--t2)',bn:psuWarn,on:!!(psu&&mb)},
+  ];
+  const rn=(k,nd)=>{
+    const{x,y,w,h:hh,lbl,icon,col,comp,info,sub}=nd;const cx=x+w/2;const a=!!comp;
+    return h('g',{key:k},
+      a&&h('rect',{x:x-2,y:y-2,width:w+4,height:hh+4,fill:'none',stroke:col,strokeWidth:'1',opacity:'0.18'}),
+      h('rect',{x,y,width:w,height:hh,fill:a?'#131320':'#0d0d18',stroke:a?col:'#1e1e35',strokeWidth:a?2:1}),
+      a&&h('g',null,h('rect',{x,y,width:4,height:4,fill:col}),h('rect',{x:x+w-4,y,width:4,height:4,fill:col}),h('rect',{x,y:y+hh-4,width:4,height:4,fill:col}),h('rect',{x:x+w-4,y:y+hh-4,width:4,height:4,fill:col})),
+      h('text',{x:cx,y:y+13,textAnchor:'middle',fill:a?col:'#3a3a5a',fontSize:'6',fontFamily:"'Press Start 2P',monospace"},icon+' '+lbl),
+      h('text',{x:cx,y:y+27,textAnchor:'middle',fill:a?'#dde0ff':'#3a3a5a',fontSize:'9',fontFamily:"'JetBrains Mono',monospace",fontWeight:a?'700':'400'},comp?comp.name?.slice(0,18):'— не выбрано —'),
+      a&&info&&h('text',{x:cx,y:y+40,textAnchor:'middle',fill:col,fontSize:'8',fontFamily:"'JetBrains Mono',monospace"},info+(sub?' · '+sub.slice(0,13):'')),
+      k==='gpu'&&a&&n>1&&h('g',null,
+        h('rect',{x:x+w-24,y:y+2,width:22,height:12,fill:gpu?.nvlink?'rgba(170,68,255,.3)':'rgba(255,204,0,.2)',stroke:gpu?.nvlink?'var(--p)':'var(--y)',strokeWidth:'1'}),
+        h('text',{x:x+w-13,y:y+10,textAnchor:'middle',fill:gpu?.nvlink?'var(--p)':'var(--y)',fontSize:'7',fontFamily:"'Press Start 2P',monospace"},'×'+n)
+      )
+    );
+  };
+  return h('div',{className:'nwrap'},
+    h('div',{className:'shdr'},'NODE VIEW — СХЕМА ПОДКЛЮЧЕНИЙ'),
+    none&&h('div',{className:'nhint'},'ПЕРЕЙДИ НА ВКЛАДКУ BUILD И ВЫБЕРИ КОМПОНЕНТЫ — ГРАФ ОБНОВИТСЯ АВТОМАТИЧЕСКИ'),
+    h('div',{className:'nsvg'},
+      h('svg',{viewBox:'0 0 740 400',style:{width:'100%',display:'block'}},
+        h('defs',null,h('pattern',{id:'ng',width:'20',height:'20',patternUnits:'userSpaceOnUse'},h('path',{d:'M20 0L0 0 0 20',fill:'none',stroke:'rgba(30,30,65,.9)',strokeWidth:'0.5'}))),
+        h('rect',{width:'740',height:'400',fill:'url(#ng)'}),
+        conns.map(c=>h('g',{key:c.key},
+          h('path',{d:c.path,fill:'none',stroke:c.on?c.col:'#1e1e35',strokeWidth:c.bn?2.5:1.5,strokeDasharray:c.bn?'6 3':c.on?'none':'4 4',opacity:c.on?1:0.3,style:c.bn?{animation:'pulse .8s ease-in-out infinite'}:{}}),
+          c.on&&h('g',null,
+            h('rect',{x:c.lx-32,y:c.ly-7,width:64,height:13,rx:'1',fill:'#07070f',stroke:c.col,strokeWidth:'0.5',opacity:'0.92'}),
+            h('text',{x:c.lx,y:c.ly+3,textAnchor:'middle',fill:c.col,fontSize:'5.5',fontFamily:"'Press Start 2P',monospace"},c.lbl)
+          )
+        )),
+        Object.entries(N).map(([k,nd])=>rn(k,nd)),
+        bneck&&h('g',null,h('circle',{cx:570,cy:207,r:9,fill:'rgba(255,51,85,.15)',stroke:'var(--r)',strokeWidth:'1.5',style:{animation:'pulse .6s infinite'}}),h('text',{x:570,y:211,textAnchor:'middle',fill:'var(--r)',fontSize:'11'},'⚠'))
+      )
+    ),
+    h('div',{className:'nleg'},
+      [['var(--c)','CPU→MB'],['var(--g)','GPU→MB: PCIe'],['var(--p)','RAM→MB: DDR5'],['var(--y)','Storage→MB: NVMe'],['var(--t2)','PSU→MB'],['var(--r)','- - - BOTTLENECK']].map(([col,lbl],i)=>
+        h('div',{key:i,className:'nlegi'},h('svg',{width:'20',height:'3'},h('line',{x1:'0',y1:'1.5',x2:'20',y2:'1.5',stroke:col,strokeWidth:'2',strokeDasharray:col==='var(--r)'?'4,2':'none'})),lbl)
+      )
+    ),
+    (bneck||sockErr||psuWarn)&&h('div',{style:{display:'flex',flexDirection:'column',gap:'8px'}},
+      bneck&&h('div',{className:'wb warn'},'⚠️ PCIe BOTTLENECK: Multi-GPU без NVLink — ~64 GB/s. Модели 70B+ замедляются.'),
+      sockErr&&h('div',{className:'wb error'},'⛔ SOCKET MISMATCH: CPU '+cpu?.socket+' ≠ MB '+mb?.socket),
+      psuWarn&&h('div',{className:'wb warn'},'⚠️ PSU перегружен: нагрузка ~'+tdp+'W, блок '+psu?.w+'W (нужно '+Math.ceil(tdp*1.25)+'W)')
+    )
+  );
+}
+
+function VRLab(){
+  return h('div',{className:'vrwrap'},
+    h('div',{className:'shdr'},'VR LAB — СРАВНЕНИЕ ШЛЕМОВ'),
+    h('div',{style:{fontFamily:'var(--fm)',fontSize:'11px',color:'var(--t2)',marginBottom:'18px',padding:'10px 14px',background:'var(--bgc)',border:'1px solid var(--bd)'}},'Для творческих задач: минимальный вес + максимальное разрешение. ',h('span',{style:{color:'var(--g)'}},'✅ РЕКОМЕНДОВАН'),' = наш выбор.'),
+    h('div',{className:'vrgrid'},
+      VRS.map(vr=>h('div',{key:vr.id,className:'vrcard'+(vr.rec?' rec':'')+(vr.tba?' tba':'')},
+        vr.rec&&h('div',{className:'vrrec'},'✅ РЕКОМЕНДОВАН'),
+        vr.tba&&h('div',{className:'vrtba'},'⏳ TBA 2026'),
+        h('div',{className:'vrname'},vr.name),
+        h('div',{className:'vrprice'},vr.price!=null?'$'+vr.price.toLocaleString():'Цена TBA'),
+        !vr.tba&&h('div',null,
+          h('div',{className:'vrbr'},h('div',{className:'vrbl'},h('span',null,'📺 РАЗРЕШЕНИЕ'),h('span',{style:{color:'var(--b)'}},vr.res)),h('div',{className:'vrbt'},h('div',{className:'vrbf',style:{width:vr.sr+'%',background:'linear-gradient(90deg,#004466,var(--b))'}}))),
+          h('div',{className:'vrbr'},h('div',{className:'vrbl'},h('span',null,'⚖️ ВЕС (меньше=лучше)'),h('span',{style:{color:'var(--g)'}},vr.g+'г')),h('div',{className:'vrbt'},h('div',{className:'vrbf',style:{width:vr.sw+'%',background:'linear-gradient(90deg,#006633,var(--g))'}}))),
+          vr.fov&&h('div',{className:'vrbr'},h('div',{className:'vrbl'},h('span',null,'👁️ FOV'),h('span',{style:{color:'var(--p)'}},vr.fov+'°')),h('div',{className:'vrbt'},h('div',{className:'vrbf',style:{width:vr.sf+'%',background:'linear-gradient(90deg,#330066,var(--p))'}})))
+        ),
+        h('div',{className:'vrsg'},
+          h('div',{className:'vrsi'},'🔄 ',h('b',null,vr.hz+'Hz')),h('div',{className:'vrsi'},'📶 ',h('b',null,vr.wifi?'✅':'❌')),
+          h('div',{className:'vrsi'},'🖥️ PCVR: ',h('b',null,vr.pcvr?'✅':'❌')),h('div',{className:'vrsi'},'👤 SA: ',h('b',null,vr.sa?'✅':'❌')),
+          h('div',{className:'vrsi'},'👁️ Eye: ',h('b',null,vr.eye?'✅':'❌')),h('div',{className:'vrsi'},'✋ Hand: ',h('b',null,vr.hand?'✅':'❌'))
+        ),
+        h('div',{className:'vrnote'},vr.notes),
+        h('div',{className:'vrpc'},
+          h('div',{className:'vrpros'},h('div',{className:'vrpt'},'+ ПЛЮСЫ'),vr.pros.map((p,i)=>h('div',{key:i,className:'vri'},'✓ '+p))),
+          h('div',{className:'vrcons'},h('div',{className:'vrct'},'− МИНУСЫ'),vr.cons.map((c,i)=>h('div',{key:i,className:'vri'},'✗ '+c)))
+        )
+      ))
+    ),
+    h('div',{style:{padding:'14px 16px',background:'rgba(0,255,136,.04)',border:'1px solid rgba(0,255,136,.15)',fontFamily:'var(--fm)',fontSize:'11px',color:'var(--t2)',lineHeight:1.7}},
+      h('span',{style:{color:'var(--g)',fontFamily:'var(--fp)',fontSize:'7px'}},'// ВЫВОД'),h('br'),
+      'Долгие сессии: ',h('strong',{style:{color:'var(--g)'}},'Bigscreen Beyond 2'),' (127г). Острота: ',h('strong',{style:{color:'var(--b)'}},'Pimax Crystal Super'),' (3552×3840, 140°). Standalone: ',h('strong',{style:{color:'var(--y)'}},'Meta Quest 3'),'.'
+    )
+  );
+}
+
+function CompareView({onLoad}){
+  const[lid,setLid]=useState(PRESETS[0].id);const[rid,setRid]=useState(PRESETS[1].id);
+  const bfp=p=>({gpu:GPUS.find(g=>g.id===p.gpu),n:p.n,cpu:CPUS.find(c=>c.id===p.cpu),mb:MBS.find(m=>m.id===p.mb),ram:RAMS.find(r=>r.id===p.ram),psu:PSUS.find(x=>x.id===p.psu),stor:STORS.find(s=>s.id===p.stor)});
+  const lp=PRESETS.find(p=>p.id===lid);const rp=PRESETS.find(p=>p.id===rid);
+  const ls=calcStats(bfp(lp));const rs=calcStats(bfp(rp));
+  const SR=({emoji,lbl,lv,rv,unit})=>{
+    if(!lv&&!rv)return null;
+    const lw=lv>rv;const rw=rv>lv;
+    return h('div',{style:{display:'flex',alignItems:'center',gap:'8px',marginBottom:'6px',fontFamily:'var(--fm)',fontSize:'11px'}},
+      h('span',{style:{minWidth:150,color:'var(--td)',fontSize:'10px'}},emoji+' '+lbl),
+      h('span',{style:{minWidth:80,textAlign:'right',color:lw?'var(--g)':rw?'var(--r)':'var(--t2)'}},lv?.toLocaleString()+unit),
+      h('span',{style:{color:'var(--td)',fontSize:'9px',padding:'0 4px'}},'vs'),
+      h('span',{style:{minWidth:80,color:rw?'var(--g)':lw?'var(--r)':'var(--t2)'}},rv?.toLocaleString()+unit)
+    );
+  };
+  const col=(p,b,sel,onSel,side)=>h('div',{className:'ccol'},
+    h('div',{className:'ccolhdr'},side==='l'?'◀ СБОРКА A':'СБОРКА B ▶'),
+    h('select',{className:'csel',value:sel,onChange:e=>onSel(e.target.value)},PRESETS.map(p2=>h('option',{key:p2.id,value:p2.id},p2.e+' '+p2.name+' (~$'+p2.price.toLocaleString()+')'))),
+    h('div',{style:{fontFamily:'var(--fp)',fontSize:'10px',color:'var(--y)',marginBottom:'12px'}},p.e+' '+p.name),
+    h('div',{className:'crows'},
+      [['🎮 GPU',b.gpu?b.gpu.name+' ×'+b.n:'—'],['🧠 CPU',b.cpu?.name||'—'],['🔌 MB',b.mb?.name?.slice(0,22)||'—'],['💾 RAM',b.ram?b.ram.gb+'GB '+b.ram.type:'—'],['⚡ PSU',b.psu?b.psu.w+'W':'—'],['💿 Stor',b.stor?b.stor.tb+'TB':'—']].map(([l,v])=>h('div',{key:l,className:'crow'},h('span',{className:'clbl'},l),h('span',{className:'cval'},v)))
+    ),
+    h('button',{className:'loadbtn',style:{marginTop:'8px'},onClick:()=>onLoad(p)},'⚒️ ЗАГРУЗИТЬ В BUILD')
+  );
+  return h('div',{className:'cwrap'},
+    h('div',{className:'shdr'},'COMPARE — СРАВНЕНИЕ СБОРОК'),
+    h('div',{className:'ccols'},col(lp,bfp(lp),lid,setLid,'l'),col(rp,bfp(rp),rid,setRid,'r')),
+    ls&&rs&&h('div',{style:{marginTop:'18px',background:'var(--bg2)',border:'2px solid var(--bd)',padding:'18px'}},
+      h('div',{className:'shdr'},'СРАВНЕНИЕ ХАРАКТЕРИСТИК'),
+      h('div',{style:{display:'flex',gap:'8px',marginBottom:'10px',fontFamily:'var(--fp)',fontSize:'7px',color:'var(--td)'}},'',h('span',{style:{minWidth:150}}),h('span',{style:{minWidth:80,textAlign:'right',color:'var(--g)'}},lp.e+' '+lp.name),h('span',{style:{minWidth:30}}),h('span',{style:{minWidth:80,color:'var(--b)'}},rp.e+' '+rp.name)),
+      h(SR,{emoji:'🧠',lbl:'AI TOPS',lv:Math.round(ls.ai),rv:Math.round(rs.ai),unit:' T'}),
+      h(SR,{emoji:'🎬',lbl:'Video',lv:Math.round(ls.video),rv:Math.round(rs.video),unit:' pts'}),
+      h(SR,{emoji:'📦',lbl:'VRAM',lv:ls.vram,rv:rs.vram,unit:' GB'}),
+      h(SR,{emoji:'⚡',lbl:'Power',lv:ls.tdp,rv:rs.tdp,unit:'W'}),
+      (ls.bw>0||rs.bw>0)&&h(SR,{emoji:'🔗',lbl:'GPU BW',lv:ls.bw,rv:rs.bw,unit:' GB/s'}),
+      h('div',{style:{marginTop:'14px',display:'flex',justifyContent:'space-between',fontFamily:'var(--fp)',fontSize:'9px',paddingTop:'10px',borderTop:'1px solid var(--bd)'}},
+        h('span',{style:{color:'var(--y)'}},'💰 ~$'+lp.price.toLocaleString()),h('span',{style:{color:'var(--td)'}},'vs'),h('span',{style:{color:'var(--y)'}},'💰 ~$'+rp.price.toLocaleString())
+      )
+    )
+  );
+}
+
+function PresetsGallery({onLoad}){
+  const[exp,setExp]=useState({});
+  const chips=p=>{
+    const gpu=GPUS.find(g=>g.id===p.gpu);const cpu=CPUS.find(c=>c.id===p.cpu);const ram=RAMS.find(r=>r.id===p.ram);
+    const b={gpu,n:p.n,cpu,mb:MBS.find(m=>m.id===p.mb),ram,psu:PSUS.find(x=>x.id===p.psu),stor:STORS.find(s=>s.id===p.stor)};
+    const st=calcStats(b);const arr=[];
+    if(gpu)arr.push({t:gpu.name+(p.n>1?' ×'+p.n:''),cl:'g'});
+    if(gpu)arr.push({t:gpu.vram*p.n+'GB VRAM',cl:'b'});
+    if(cpu)arr.push({t:cpu.name,cl:''});
+    if(ram)arr.push({t:ram.gb+'GB RAM',cl:'p'});
+    if(st)arr.push({t:Math.round(st.ai).toLocaleString()+' AI TOPS',cl:'y'});
+    return arr;
+  };
+  return h('div',{className:'pgwrap'},
+    h('div',{className:'shdr'},'PRESETS — ВЕРИФИЦИРОВАННЫЕ СБОРКИ'),
+    h('div',{style:{fontFamily:'var(--fm)',fontSize:'11px',color:'var(--t2)',marginBottom:'18px',padding:'10px 14px',background:'var(--bgc)',border:'1px solid var(--bd)'}},h('span',{style:{color:'var(--p)',fontFamily:'var(--fp)',fontSize:'7px'}},'// ИСТОЧНИКИ'),' MIT HAN Lab, ArsenalPC, B&H Photo, HuggingFace Discuss.'),
+    h('div',{className:'pggrid'},
+      PRESETS.map(p=>{
+        const ch=chips(p);const revs=REVIEWS[p.id]||[];const isExp=exp[p.id];
+        return h('div',{key:p.id,className:'pgcard'},
+          h('div',{className:'pgemoji'},p.e),
+          h('div',{className:'pgname'},p.name),
+          h('div',{className:'pgdesc'},p.desc),
+          h('div',{className:'pgprice'},'~$'+p.price.toLocaleString()),
+          h('div',{className:'pgchips'},ch.map((c,i)=>h('span',{key:i,className:'chip '+(c.cl||'')},c.t))),
+          h('button',{className:'loadbtn',onClick:()=>onLoad(p)},'⚒️ ЗАГРУЗИТЬ В BUILD'),
+          h('div',{className:'revs'},
+            h('div',{className:'revtit'},'💬 ОТЗЫВЫ'+(revs.length===0?' — пока нет':'')),
+            revs.length>0&&h('div',null,
+              (isExp?revs:revs.slice(0,1)).map(r=>h('div',{key:r.id,className:'rev '+r.s},
+                h('div',{className:'revhdr'},h('div',{className:'revauth'},r.icon,' ',r.auth,r.v&&h('span',{style:{color:'var(--g)'}},' ✓'),' ',h('span',{style:{color:'var(--td)'}},r.plat)),h('span',{className:'revdate'},r.date)),
+                h('div',{className:'revtxt'},r.txt),
+                h('div',{className:'revftr'},h('span',{className:'revstars'},'★'.repeat(r.stars)+'☆'.repeat(5-r.stars)),r.url&&h('a',{className:'revlink',href:r.url,target:'_blank',rel:'noopener noreferrer'},'↗ Источник'))
+              )),
+              revs.length>1&&h('button',{onClick:()=>setExp(e=>({...e,[p.id]:!e[p.id]})),style:{width:'100%',marginTop:'4px',padding:'6px',fontFamily:'var(--fp)',fontSize:'6px',background:'transparent',border:'1px solid var(--bd)',color:'var(--td)',cursor:'pointer'}},isExp?'▲ СВЕРНУТЬ':'▼ ЕЩЁ '+(revs.length-1)+' ОТЗЫВ'+(revs.length-1>1?'А':''))
+            )
+          )
+        );
+      })
+    )
+  );
+}
+
+function fitBadge(need,gv,n){
+  const tot=gv*n;
+  if(need==null)return{cl:'fno',l:'N/A'};if(need<=gv)return{cl:'fok',l:'✅ ВЛЕЗЕТ'};
+  if(need<=tot)return{cl:'fwarn',l:'⚠️ '+Math.ceil(need/gv)+'× GPU'};
+  if(need<=gv*4)return{cl:'fneed',l:'🔀 '+Math.ceil(need/gv)+'× GPU'};
+  return{cl:'fno',l:'❌ НЕ ВЛЕЗЕТ'};
+}
+function BenchRow({model,gv,n,isLLM}){
+  const avq=QORD.filter(q=>model.q[q]);
+  const[q,setQ]=useState(()=>avq.includes('FP8')?'FP8':avq[0]);
+  const qd=model.q[q];const fit=fitBadge(qd?.v,gv,n);const stars=QQ[q]||3;
+  return h('tr',null,
+    h('td',null,h('div',{className:'mname'},model.name),h('div',{className:'mdev'},model.dev+(model.p?' · '+model.p+'B':'')),h('span',{className:'mtype'},isLLM?model.cat:model.type),h('div',{className:'mstr'},model.str.slice(0,2).map((s,i)=>h('span',{key:i,className:'mstri'},s)))),
+    h('td',null,h('div',{className:'qtog'},avq.map(qq=>h('button',{key:qq,className:'qbtn '+(q===qq?'on':''),onClick:()=>setQ(qq)},qq))),h('div',{style:{display:'flex',gap:2,marginTop:4}},[1,2,3,4,5].map(i=>h('span',{key:i,style:{color:i<=stars?'var(--y)':'var(--td)',fontSize:11}},'★')))),
+    h('td',{className:'vcel'},qd?.v!=null?qd.v+' GB':'—'),
+    h('td',null,h('span',{className:'fitbadge '+fit.cl},fit.l)),
+    h('td',{className:'spcel',style:{color:isLLM?'var(--c)':'var(--g)'}},isLLM?(qd?.s5?qd.s5.toLocaleString()+' tok/s':'—'):(qd?.sp!=null?qd.sp+'s/клип':'—')),
+    isLLM?h('td',{className:'spcel',style:{color:'var(--p)'}},qd?.sp?qd.sp.toLocaleString()+' tok/s':'—'):h('td',{style:{fontFamily:'var(--fm)',fontSize:'10px',color:'var(--t2)'}},model.res+' · '+model.dur),
+    h('td',{className:'ncel'},qd?.n||'')
+  );
+}
+function AIBenchView(){
+  const[mode,setMode]=useState('video');
+  const[gid,setGid]=useState('rtx5090');
+  const[n,setN]=useState(1);
+  const bg=GPUS.find(g=>g.id===gid);const gv=bg?.vram||32;const tv=gv*n;
+  const models=mode==='video'?VMODELS:LMODELS;
+  return h('div',{className:'bwrap'},
+    h('div',{className:'bgpubar'},
+      h('span',{className:'bgpulbl'},'ВАШ GPU:'),
+      h('select',{className:'bgpusel',value:gid,onChange:e=>setGid(e.target.value)},GPUS.map(g=>h('option',{key:g.id,value:g.id},g.name+' — '+g.vram+'GB VRAM'))),
+      h('span',{className:'bgpulbl',style:{marginLeft:4}},'×'),
+      h('button',{className:'cbtn',onClick:()=>setN(Math.max(1,n-1))},'−'),h('span',{className:'cdisp'},n),h('button',{className:'cbtn',onClick:()=>setN(Math.min(4,n+1))},'+'),
+      h('span',{className:'bvbadge'},'VRAM: '+tv+'GB'+(n>1&&bg?.nvlink?' · NVLink ✦':n>1?' · PCIe ⚠️':''))
+    ),
+    h('div',{className:'btog'},h('button',{className:'tbtn '+(mode==='video'?'on':''),onClick:()=>setMode('video')},'🎬 ВИДЕОГЕНЕРАЦИЯ'),h('button',{className:'tbtn '+(mode==='llm'?'on':''),onClick:()=>setMode('llm')},'🧠 LLM МОДЕЛИ')),
+    h('div',{className:'bleg'},
+      h('div',{className:'blegi'},h('span',{className:'fitbadge fok'},'✅ ВЛЕЗЕТ'),' 1× GPU'),
+      h('div',{className:'blegi'},h('span',{className:'fitbadge fwarn'},'⚠️ НУЖНО 2×'),' несколько карт'),
+      h('div',{className:'blegi'},h('span',{className:'fitbadge fno'},'❌ НЕ ВЛЕЗЕТ'),' недостаточно VRAM'),
+      h('div',{className:'blegi',style:{marginLeft:'auto',fontFamily:'var(--fp)',fontSize:'7px',color:'var(--td)'}},META.date)
+    ),
+    h('table',{className:'btable'},
+      h('thead',null,h('tr',null,h('th',null,'МОДЕЛЬ'),h('th',null,'КВАНТ / КАЧЕСТВО'),h('th',null,'VRAM'),h('th',null,'FIT ('+tv+'GB)'),h('th',null,mode==='video'?'СКОРОСТЬ (RTX 5090)':'ТОК/С (RTX 5090)'),mode==='llm'?h('th',null,'ТОК/С (PRO 6000)'):h('th',null,'RES / ДЛИНА'),h('th',null,'ЗАМЕТКИ'))),
+      h('tbody',null,models.map(m=>h(BenchRow,{key:m.id,model:m,gv,n,isLLM:mode==='llm'})))
+    ),
+    mode==='llm'&&h('div',{style:{marginTop:18,padding:'12px 16px',background:'rgba(170,68,255,.06)',border:'1px solid rgba(170,68,255,.2)',fontFamily:'var(--fm)',fontSize:'11px',color:'var(--t2)',lineHeight:1.7}},
+      h('span',{style:{color:'var(--p)',fontFamily:'var(--fp)',fontSize:'7px'}},'// ВАЖНО'),h('br'),
+      '2× RTX 5090 через PCIe — скорость ',h('strong',{style:{color:'var(--y)'}},'НЕ удваивается'),' (bottleneck ~64 GB/s). RTX PRO 6000 с NVLink в ',h('strong',{style:{color:'var(--g)'}},'~1.8× быстрее'),'.'
+    ),
+    h('div',{style:{height:40}})
+  );
+}
+
+const TABS=[{id:'build',l:'⚒️ BUILD'},{id:'aibench',l:'🤖 AI BENCH'},{id:'node',l:'🔀 NODE VIEW'},{id:'vr',l:'🥽 VR LAB'},{id:'compare',l:'📊 COMPARE'},{id:'presets',l:'📁 PRESETS'}];
+
+function App(){
+  const[build,setBuild]=useState({gpu:null,n:1,cpu:null,mb:null,ram:null,psu:null,stor:null});
+  const[ap,setAp]=useState(null);
+  const[tab,setTab]=useState('build');
+  const loadAndGo=p=>{setAp(p.id);setBuild({gpu:p.gpu,n:p.n,cpu:p.cpu,mb:p.mb,ram:p.ram,psu:p.psu,stor:p.stor});setTab('build');};
+  return h('div',{style:{minHeight:'100vh'}},
+    h('header',{className:'hdr'},
+      h('div',{className:'logo'},
+        h(PixelLogo),
+        h('div',null,h('div',{className:'logo-title'},'PCFORGE'),h('div',{className:'logo-sub'},'AI/ML PC BUILDER SIMULATOR')),
+        h('div',{className:'logo-ver'},'v'+META.ver)
+      ),
+      h('div',{className:'hdr-meta'},'Данные: ',h('span',null,META.date),h('br'),'Newegg · NVIDIA · B&H Photo')
+    ),
+    h('nav',{className:'tabs'},TABS.map(t=>h('button',{key:t.id,className:'tab '+(tab===t.id?'on':''),onClick:()=>setTab(t.id)},t.l))),
+    tab==='build'&&h(BuildView,{build,setBuild,ap,setAp}),
+    tab==='aibench'&&h(AIBenchView),
+    tab==='node'&&h(NodeView,{build}),
+    tab==='vr'&&h(VRLab),
+    tab==='compare'&&h(CompareView,{onLoad:loadAndGo}),
+    tab==='presets'&&h(PresetsGallery,{onLoad:loadAndGo})
+  );
+}
+if(typeof React==='undefined'||typeof ReactDOM==='undefined'){
+  document.getElementById('app').innerHTML='<div style="padding:40px;font-family:monospace;color:#ff8899;background:#1a0008;border:2px solid #ff3355;margin:20px;">Не удалось загрузить React с CDN (cdnjs.cloudflare.com). Проверьте интернет-соединение или настройки сети/блокировщика рекламы и перезагрузите страницу (F5).</div>';
+}else{
+  ReactDOM.createRoot(document.getElementById('app')).render(h(App));
+}
+</script>
+</body>
+</html>
