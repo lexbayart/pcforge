@@ -82,6 +82,7 @@ This is PCForge's killer feature. It tells you whether specific AI models will f
 - **HunyuanVideo 1.5** — Tencent's model, fits on single RTX 5090 at FP16
 - **LTX-2.3 22B** — fastest video gen, 4K 50fps, audio+video
 - **CogVideoX-5B** — runs on 12GB, Apache 2.0 licensed
+- **AnimateDiff** — image-to-video loops, minimal requirements (8GB)
 
 ### LLM models covered
 
@@ -116,15 +117,15 @@ Go to BUILD first, select your components, then switch to NODE VIEW to see the d
 
 ## 🥽 VR LAB Tab — Headset Comparison
 
-Comparison of 5 VR headsets for creative/AI workflows:
+Comparison of VR headsets for creative/AI workflows. Headsets are ranked by the user's priorities: weight first, resolution second.
 
-- **Bigscreen Beyond 2** — recommended for long sessions (127g, lightest)
-- **Meta Quest 3** — best price/quality balance, standalone + PCVR
-- **Pimax Crystal Super** — highest resolution (3552×3840), but 860g
-- **Apple Vision Pro** — Micro-OLED, but macOS only, no Steam
-- **Valve Steam Frame** — expected 2026, wireless PCVR (specs TBD)
-
-Each card shows resolution, weight, FOV, refresh rate, connectivity, and pros/cons.
+- **Meta Quest 3** — best balance (515g, good resolution, standalone + PCVR, ~$499)
+- **Meta Quest 3S** — budget option (514g, lower resolution, ~$299)
+- **Pimax Crystal Super** — highest resolution (3840×3840 per eye), but heavy (~820g)
+- **Valve Index** — wide FOV (130°), but heavy (~809g)
+- **HTC Vive XR Elite** — middle ground (625g, 110° FOV)
+- **Apple Vision Pro** — excellent display, but NOT compatible with Windows PC (macOS only)
+- **Valve Steam Frame** — expected 2026, specs TBD
 
 ---
 
@@ -138,9 +139,18 @@ Click **⚒️ ЗАГРУЗИТЬ В BUILD** on any preset to load it into the c
 
 ## 📁 PRESETS Tab — Verified Builds Gallery
 
-Expanded view of all four presets with specs, stats, and verified reviews from real sources (MIT HAN Lab, B&H Photo, HuggingFace, Puget Systems, TechRadar).
+Expanded view of all presets with specs, stats, and verified reviews from real sources (MIT HAN Lab, B&H Photo, HuggingFace, Puget Systems, TechRadar).
 
-Click **▼ ЕЩЁ** to expand additional reviews for a preset.
+### MacBook Pro M5 Max — reference preset
+
+A special, non-editable preset included for comparison. It represents the user's current system:
+
+- **Apple M5 Max** chip, 48GB unified memory, 2TB storage
+- **No CUDA support** — AI models run through MPS (Metal Performance Shaders), significantly slower than NVIDIA
+- **Wan 2.2 FP16 won't run** (no CUDA); HunyuanVideo 1.5 Q4 runs at ~400-600s per clip vs ~75s on RTX 5090
+- **LLM inference** — Llama 3 8B Q4 at ~40-60 tok/s (vs 1200 on RTX 5090)
+
+Use this preset in COMPARE mode to see the performance gap between your MacBook and a dedicated AI workstation. It's the "before" picture that makes the "after" meaningful.
 
 ---
 
@@ -150,11 +160,32 @@ PCForge does not use keyboard shortcuts. All interaction is through mouse/touch.
 
 ---
 
+## 🗺️ Roadmap
+
+PCForge is developed in phases. Here's where things stand:
+
+| Phase | Status | Features |
+|-------|--------|----------|
+| **Phase 1 — MVP** | ✅ Done | Build configurator, component catalogs, cost calculator, stat bars, presets, compatibility checks |
+| **Phase 2 — AI Intelligence** | ✅ Done | AI Bench with video + LLM models, quantization toggles, fit indicators, MacBook comparison |
+| **Phase 3 — Visual Builder** | 🚧 In progress | Drag-and-drop, Node View topology diagram, animated warnings, pixel art icons |
+| **Phase 4 — Compare & Export** | 🔜 Coming | Side-by-side build comparison, export/copy build to text, VR Lab, buy links |
+| **Phase 5 — Advanced** | 🔮 Planned | Claude API for live suggestions, localStorage saves, OS recommendations, peripheral catalogs |
+
+The full design document with data schemas and development checklist is in [docs/MASTER_PROMPT.md](./MASTER_PROMPT.md).
+
+---
+
 ## ⚠️ Known Limitations
 
 - **Hardware database is curated, not exhaustive** — only 3 GPUs, 4 CPUs, 3 motherboards, 4 RAM kits, 4 PSUs, 3 SSDs. Covers the AI workstation segment specifically.
-- **Model list is current as of June 2026** — new models released after this date won't be included.
+- **Prices are not real-time** — updated manually at each development session. The data version date is shown in the UI. Always verify current prices before purchasing.
+- **RTX PRO 6000 is in shortage** (as of June 2026) — prices are volatile. The app shows a ⚠️ deficit warning.
+- **Model list is current as of June 2026** — new models released after this date won't be included until the next update.
 - **Performance numbers are estimates** — based on published benchmarks and architectural analysis, not direct testing of every combination.
+- **Apple Vision Pro is not compatible with Windows PC** — marked clearly in VR Lab.
+- **Wan 2.2 and HunyuanVideo at FP16** — on RTX 5090, FP16 versions may not fit. The app shows a green dot indicating which quantization level will work.
+- **MacBook M5 Max comparison** — ComfyUI runs through MPS on Apple Silicon, but CUDA optimizations (sageattn3, flash attention) are unavailable. Speed differences are shown honestly.
 - **Requires internet for React CDN** — the app loads React from cdnjs.cloudflare.com. If offline on first load, it won't work. After page loads, no further internet needed.
 - **No save/export** — builds are not persisted between sessions. Take a screenshot of your config if you need to remember it.
 - **Russian UI** — the interface is in Russian. This guide is in English.
